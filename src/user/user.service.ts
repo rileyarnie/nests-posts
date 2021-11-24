@@ -29,7 +29,7 @@ export class UserService {
   }
 
   async findAll() {
-    const user = await this.userRepository.find();
+    const user = await this.userRepository.find({ relations: ['posts'] });
     if (!user) {
       throw new NotFoundException('The user could not be found');
     }
@@ -37,7 +37,10 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    const user = await this.userRepository.findOne({ id });
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['posts'] },
+    );
     if (!user) {
       throw new NotFoundException('The user could not be found');
     }
