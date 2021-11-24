@@ -7,16 +7,15 @@ import {
   Param,
   Delete,
   Res,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthService } from './auth.service';
-import { Request, Response } from 'express';
-import { REQUEST } from '@nestjs/core';
+import { Response } from 'express';
 import { AuthGuard } from './guards/auth.guard';
+import { GetUser } from './decorators/getuser.decorator';
 
 @Controller('user')
 export class UserController {
@@ -40,8 +39,8 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get('current-user')
-  async getCurrentUser(@Req() request: Request) {
-    return this.authService.getCurrentUser(request);
+  async getCurrentUser(@GetUser('access_token') access_token: string) {
+    return this.authService.getCurrentUser(access_token);
   }
 
   @Get()
