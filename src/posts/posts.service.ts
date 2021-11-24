@@ -1,15 +1,34 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AuthService } from 'src/user/auth.service';
+import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Post } from './entities/post.entity';
 
 @Injectable()
 export class PostsService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
+    private authService: AuthService,
+  ) {}
+
+  async create(createPostDto: CreatePostDto, access_token: string) {
+    const { id } = await this.authService.getCurrentUser(access_token);
+    const createdPost = this.postRepository.create({
+      ...createPostDto,
+      authorId: id,
+    });
+
+    return this.postRepository.save(createdPost);
   }
 
   findAll() {
-    return `This action returns all posts`;
+    return this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.authorId', 'user.id')
+      .getMany();
   }
 
   findOne(id: number) {
