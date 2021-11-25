@@ -9,7 +9,7 @@ import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -52,15 +52,11 @@ export class AuthService {
     return 'Login Successful';
   }
 
-  async getCurrentUser(request: Request) {
-    const cookie = request.cookies['access_token'];
-
-    const data = await this.jwtService.verify(cookie);
+  async getCurrentUser(access_token: string) {
+    const data = await this.jwtService.verify(access_token);
     if (!data) {
       throw new UnauthorizedException();
     }
-    const { password, ...user } = await this.userService.findOne(data.sub);
-
-    return user;
+    return await this.userService.findOne(data.sub);
   }
 }
